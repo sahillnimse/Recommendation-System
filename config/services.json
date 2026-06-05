@@ -1,0 +1,85 @@
+{
+  "core_services": [
+    "APPLICATION_DRAFTING",
+    "RESEARCH",
+    "QUERY_ANSWER",
+    "SYNOPSIS_GENERATION",
+    "DOCUMENT_EMBEDDING"
+  ],
+  "service_priority": [
+    "APPLICATION_DRAFTING",
+    "RESEARCH",
+    "QUERY_ANSWER",
+    "SYNOPSIS_GENERATION",
+    "DOCUMENT_EMBEDDING"
+  ],
+  "services": {
+    "APPLICATION_DRAFTING": {
+      "label": "Application Drafting",
+      "icon": "✍️",
+      "color": "#00e5a0",
+      "pill": "pill-green",
+      "cluster_id": 0
+    },
+    "RESEARCH": {
+      "label": "Legal Research",
+      "icon": "🔬",
+      "color": "#a99ef7",
+      "pill": "pill-purple",
+      "cluster_id": 1
+    },
+    "QUERY_ANSWER": {
+      "label": "Query Answer",
+      "icon": "💬",
+      "color": "#f7b731",
+      "pill": "pill-yellow",
+      "cluster_id": 2
+    },
+    "SYNOPSIS_GENERATION": {
+      "label": "Synopsis Generation",
+      "icon": "📑",
+      "color": "#38bdf8",
+      "pill": "pill-blue",
+      "cluster_id": 0
+    },
+    "DOCUMENT_EMBEDDING": {
+      "label": "Document Embedding",
+      "icon": "🗂️",
+      "color": "#ff4d6d",
+      "pill": "pill-red",
+      "cluster_id": 0
+    }
+  },
+  "recommendation": {
+    "gap_usage_percentile": 25,
+    "use_percentile_gaps": false
+  },
+  "cluster_analysis": {
+    "run_on_build": true,
+    "k_min": 2,
+    "k_max": 8,
+    "sample_users": 2000
+  },
+  "clusters": {
+    "0": {
+      "label": "Heavy Draftsman",
+      "icon": "✍️",
+      "desc": "Power user of Application Drafting — high-frequency document creator"
+    },
+    "1": {
+      "label": "Heavy Researcher",
+      "icon": "🔬",
+      "desc": "Deep legal research user — case laws, judgments, and court updates"
+    },
+    "2": {
+      "label": "Query Analyst",
+      "icon": "💬",
+      "desc": "Frequent Q&A user — legal definitions and quick lookups"
+    }
+  },
+  "user_metadata": {
+    "timestamp_columns": ["created_at", "timestamp", "event_time", "completed_at", "updated_at"],
+    "pass_through_columns": ["process_name"],
+    "display_name_from": "process_name"
+  }
+}

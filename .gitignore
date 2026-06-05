@@ -1,0 +1,23 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+.venv/
+venv/
+env/
+.env
+.env.*
+.idea/
+.vscode/
+*.db-journal
+*.db-wal
+*.db-shm
+.DS_Store
+Thumbs.db
+.ipynb_checkpoints/
+
+# Large raw exports (keep a sample or load from external storage)
+colab/*.csv
+!colab/process_tracking_2026-06-02.csv
