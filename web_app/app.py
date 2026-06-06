@@ -414,7 +414,7 @@ div[data-testid="stTabs"] button[aria-selected="true"] {{
     transition: background-color 0.2s;
 }}
 .activity-row:hover {{
-    background-color: rgba(255, 255, 255, 0.02);
+    background-color: rgba(var(--accent-rgb), 0.04);
 }}
 .activity-row:last-child {{
     border-bottom: none;
@@ -471,8 +471,8 @@ div[data-testid="stTabs"] button[aria-selected="true"] {{
     animation: pulse 2s infinite;
 }}
 @keyframes pulse {{
-    0%, 100% {{ opacity: 1; box-shadow: 0 0 0 0 rgba(0, 229, 160, 0.4); }}
-    50% {{ opacity: .3; box-shadow: 0 0 0 4px rgba(0, 229, 160, 0); }}
+    0%, 100% {{ opacity: 1; box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0.4); }}
+    50% {{ opacity: .3; box-shadow: 0 0 0 4px rgba(var(--accent-rgb), 0); }}
 }}
 
 .js-plotly-plot {{
@@ -541,6 +541,80 @@ tr:hover td {{
 }}
 tr:last-child td {{
     border-bottom: none !important;
+}}
+
+/* ── st.dataframe (Glide Data Grid) theme override ─────────────────────── */
+/* Outer wrapper */
+[data-testid="stDataFrame"] {{
+    border: 1px solid {border} !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+}}
+/* The canvas-based grid sits inside a div — we can theme the surrounding chrome */
+[data-testid="stDataFrame"] > div {{
+    background-color: {bg2} !important;
+    border-radius: 12px !important;
+}}
+/* Scrollbar inside dataframe */
+[data-testid="stDataFrame"] ::-webkit-scrollbar-track {{
+    background: {bg2} !important;
+}}
+[data-testid="stDataFrame"] ::-webkit-scrollbar-thumb {{
+    background: {border} !important;
+}}
+/* Pandas Styler rendered table (when Styler object is passed) */
+[data-testid="stDataFrame"] table,
+[data-testid="stDataFrame"] .stDataFrameGlideDataEditor table {{
+    background-color: {bg2} !important;
+    color: {text} !important;
+    border-color: {border} !important;
+}}
+/* ── TABLE HEADER FIX: multiple selectors for maximum specificity ── */
+[data-testid="stDataFrame"] thead tr th,
+[data-testid="stDataFrame"] thead th,
+[data-testid="stDataFrame"] .col_heading,
+[data-testid="stDataFrame"] .blank.level0,
+[data-testid="stDataFrame"] table thead tr th,
+div[data-testid="stDataFrame"] thead tr th,
+div[data-testid="stDataFrame"] thead th {{
+    background-color: {bg3} !important;
+    color: {accent} !important;
+    border-bottom: 2px solid {border} !important;
+    border-color: {border} !important;
+    font-family: 'Space Mono', monospace !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+}}
+[data-testid="stDataFrame"] tbody tr td,
+[data-testid="stDataFrame"] tbody tr th,
+div[data-testid="stDataFrame"] tbody tr td,
+div[data-testid="stDataFrame"] tbody tr th {{
+    background-color: {bg2} !important;
+    color: {text} !important;
+    border-color: {border} !important;
+    font-size: 13px !important;
+}}
+[data-testid="stDataFrame"] tbody tr:nth-child(even) td {{
+    background-color: {bg3} !important;
+}}
+[data-testid="stDataFrame"] tbody tr:hover td {{
+    background-color: rgba({accent_rgb}, 0.06) !important;
+}}
+/* Toolbar (fullscreen / download icons) */
+[data-testid="stDataFrameResizable"] > div:first-child {{
+    background-color: {bg3} !important;
+    border-bottom: 1px solid {border} !important;
+}}
+/* Column header sort arrows and icons */
+[data-testid="stDataFrame"] button {{
+    color: {muted} !important;
+    background: transparent !important;
+}}
+[data-testid="stDataFrame"] button:hover {{
+    color: {accent} !important;
+    background: transparent !important;
 }}
 </style>
 """, unsafe_allow_html=True)
@@ -925,9 +999,9 @@ def explorer_view(df, raw=False):
         out["Primary Fit Score"] = df["rec1_score"].map(format_score)
     if "rec1_source" in df.columns:
         out["Primary Source"] = df["rec1_source"].fillna("").str.title()
-    out["Secondary Recommendation"] = df.get(
-        "rec2_name",
-        df["cross_recommend_2"].map(lambda x: svc(x)["label"] if pd.notna(x) else ""),
+    out["Secondary Recommendation"] = (
+        df["rec2_name"] if "rec2_name" in df.columns and df["rec2_name"].notna().any()
+        else df["cross_recommend_2"].map(lambda x: svc(x)["label"] if pd.notna(x) else "")
     )
     if "rec2_score" in df.columns:
         out["Secondary Fit Score"] = df["rec2_score"].map(format_score)
@@ -938,13 +1012,105 @@ def explorer_view(df, raw=False):
     return out
 
 def style_df(df):
-    """Apply active theme colors (background and text) to st.dataframe cells using Pandas Styler."""
+    """Apply active theme colors to st.dataframe — full header + cell + border theming."""
     if df is None or df.empty:
         return df
-    return df.style.set_properties(**{
-        'background-color': bg2,
-        'color': text
-    })
+    styled = (
+        df.style
+        .set_properties(**{
+            'background-color': bg2,
+            'color': text,
+            'border-color': border,
+        })
+        .set_table_styles([
+            # Column headers — use !important-equivalent by being scoped inside UUID class
+            {
+                'selector': 'thead th',
+                'props': [
+                    ('background-color', f'{bg3} !important'),
+                    ('color', f'{accent} !important'),
+                    ('font-family', "'Space Mono', monospace !important"),
+                    ('font-size', '11px !important'),
+                    ('font-weight', '700 !important'),
+                    ('text-transform', 'uppercase !important'),
+                    ('letter-spacing', '0.08em !important'),
+                    ('border-bottom', f'2px solid {border} !important'),
+                    ('border-color', f'{border} !important'),
+                    ('padding', '12px 16px !important'),
+                ]
+            },
+            # Catch .col_heading class used by Pandas Styler
+            {
+                'selector': '.col_heading',
+                'props': [
+                    ('background-color', f'{bg3} !important'),
+                    ('color', f'{accent} !important'),
+                    ('font-family', "'Space Mono', monospace !important"),
+                    ('font-size', '11px !important'),
+                    ('font-weight', '700 !important'),
+                    ('text-transform', 'uppercase !important'),
+                    ('letter-spacing', '0.08em !important'),
+                    ('border-bottom', f'2px solid {border} !important'),
+                    ('border-color', f'{border} !important'),
+                    ('padding', '12px 16px !important'),
+                ]
+            },
+            # Blank top-left corner cell
+            {
+                'selector': 'thead th.blank, .blank.level0',
+                'props': [
+                    ('background-color', f'{bg3} !important'),
+                    ('border-color', f'{border} !important'),
+                ]
+            },
+            # All cells
+            {
+                'selector': 'tbody td',
+                'props': [
+                    ('background-color', f'{bg2} !important'),
+                    ('color', f'{text} !important'),
+                    ('border-color', f'{border} !important'),
+                    ('font-size', '13px !important'),
+                    ('padding', '10px 16px !important'),
+                ]
+            },
+            # Alternating rows
+            {
+                'selector': 'tbody tr:nth-child(even) td',
+                'props': [
+                    ('background-color', f'{bg3} !important'),
+                    ('color', f'{text} !important'),
+                ]
+            },
+            # Hover rows
+            {
+                'selector': 'tbody tr:hover td',
+                'props': [
+                    ('background-color', f'rgba({accent_rgb}, 0.06) !important'),
+                ]
+            },
+            # Index cells
+            {
+                'selector': 'tbody th',
+                'props': [
+                    ('background-color', f'{bg3} !important'),
+                    ('color', f'{muted} !important'),
+                    ('border-color', f'{border} !important'),
+                ]
+            },
+            # Table border
+            {
+                'selector': 'table',
+                'props': [
+                    ('border-collapse', 'collapse !important'),
+                    ('border', f'1px solid {border} !important'),
+                    ('background-color', f'{bg2} !important'),
+                    ('width', '100% !important'),
+                ]
+            },
+        ], overwrite=True)
+    )
+    return styled
 
 CHART_COLORS = [accent, accent2, accent3, danger, info]
 PLOT_BASE    = dict(
@@ -1467,7 +1633,10 @@ with tab1:
                         return
                     _rm = svc(rkey)
                     _lbl = rname or _rm["label"]
-                    _fit = min(100, max(0, int(float(score)))) if score is not None else None
+                    try:
+                        _fit = min(100, max(0, int(float(score)))) if score is not None and not pd.isna(score) else None
+                    except (TypeError, ValueError, OverflowError):
+                        _fit = None
                     _fit_txt = f"{_fit}% fit" if _fit is not None else "Ranked by platform trends"
                     _src = rec_source_label(source)
                     st.markdown(f"""
@@ -1614,7 +1783,7 @@ with tab2:
         _tu["Service"] = _tu["active_service"].apply(lambda x: svc(x)["label"])
         _tu = _tu.rename(columns={"user_id":"User ID","total_actions":"Total Actions"})
         st.dataframe(
-            _tu[["Name","User ID","Cluster","Service","Total Actions"]],
+            style_df(_tu[["Name","User ID","Cluster","Service","Total Actions"]]),
             use_container_width=True, hide_index=True, height=400,
         )
 
@@ -1643,7 +1812,7 @@ with tab2:
         ).reset_index()
         summary["Segment"] = summary["cluster_id"].map(lambda x: CLUSTER_META.get(x,{}).get("label","—"))
         summary.columns    = ["Cluster ID","Users","Top Active Service","Top Recommendation","Segment"]
-        st.dataframe(summary[["Cluster ID","Segment","Users","Top Active Service","Top Recommendation"]],
+        st.dataframe(style_df(summary[["Cluster ID","Segment","Users","Top Active Service","Top Recommendation"]]),
                      use_container_width=True, hide_index=True)
     except Exception as e:
         st.warning(f"Summary unavailable: {e}")
@@ -1732,7 +1901,7 @@ with tab4:
                 n_display = "?"
             st.markdown(
                 f'<div class="card" style="padding:11px 16px;margin-bottom:6px">'
-                f'<span style="font-family:\'Space Mono\',monospace;font-size:11px;color:var(--accent2)">🗄 {tbl}</span>'
+                f'<span style="font-family:\'Space Mono\',monospace;font-size:11px;color:var(--accent2)">🗄 {h(tbl)}</span>'
                 f'<span style="font-family:\'Space Mono\',monospace;font-size:10px;color:var(--muted);margin-left:12px">{n_display} rows</span></div>',
                 unsafe_allow_html=True)
 
@@ -1741,7 +1910,7 @@ with tab4:
             for idx in stats["indexes"]:
                 st.markdown(
                     f'<div class="card" style="padding:11px 16px;margin-bottom:6px">'
-                    f'<span style="font-family:\'Space Mono\',monospace;font-size:11px;color:var(--accent)">⚡ {idx}</span></div>',
+                    f'<span style="font-family:\'Space Mono\',monospace;font-size:11px;color:var(--accent)">⚡ {h(idx)}</span></div>',
                     unsafe_allow_html=True)
         else:
             st.warning("No indexes — re-run the pipeline with the fixed Cell 8.")
@@ -1758,4 +1927,3 @@ with tab4:
               <span style="color:var(--muted)">{p}</span>
               <span style="color:var(--accent)">{_val}</span>
             </div>""", unsafe_allow_html=True)
-

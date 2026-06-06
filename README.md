@@ -69,20 +69,20 @@ Raw Activity Logs  →  PySpark Feature Engineering  →  ALS + K-Means  →  SQ
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                        GOOGLE COLAB (Pipeline)                       │
-│                                                                       │
+│                       GOOGLE COLAB (Pipeline)                       │
+│                                                                     │
 │  ┌──────────────┐    ┌──────────────┐    ┌──────────────────────┐   │
-│  │  Raw Activity │ →  │   PySpark    │ →  │  ALS Collaborative   │   │
-│  │     Logs      │    │  Feature Eng │    │  Filter (MLlib)      │   │
+│  │ Raw Activity │ →  │   PySpark    │ →  │  ALS Collaborative   │   │
+│  │    Logs      │    │  Feature Eng │    │  Filter (MLlib)      │   │
 │  └──────────────┘    └──────────────┘    └──────────────────────┘   │
-│                                                    │                  │
-│                                          ┌─────────▼──────────┐     │
-│                                          │  K-Means Clustering │     │
-│                                          │  k=3, seed=42       │     │
-│                                          └─────────────────────┘     │
+│                                                  │                  │
+│                                        ┌─────────▼─────────--┐      │
+│                                        │  K-Means Clustering │      │
+│                                        │  k=3, seed=42       │      │
+│                                        └─────────────────────┘      │
 └──────────────────────────────────────────────────│──────────────────┘
                                                    │ user_clusters.db
-                                          ┌────────▼────────────────┐
+                                          ┌-────────▼────────────────┐
                                           │     SQLite (WAL Mode)    │
                                           │  ┌─────────────────────┐ │
                                           │  │   user_clusters     │ │
@@ -91,7 +91,7 @@ Raw Activity Logs  →  PySpark Feature Engineering  →  ALS + K-Means  →  SQ
                                           │  └─────────────────────┘ │
                                           └────────────────────────┬─┘
                                                                    │
-                                          ┌────────────────────────▼─┐
+                                          ┌───────────────────────▼─--┐
                                           │    Streamlit Frontend     │
                                           │  ┌──────────────────────┐ │
                                           │  │  My Workspace        │ │
@@ -99,7 +99,7 @@ Raw Activity Logs  →  PySpark Feature Engineering  →  ALS + K-Means  →  SQ
                                           │  │  Data Explorer       │ │
                                           │  │  DB Inspector        │ │
                                           │  └──────────────────────┘ │
-                                          └──────────────────────────┘
+                                          └───────-───────────────────┘
 ```
 
 ---
